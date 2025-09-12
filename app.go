@@ -166,8 +166,8 @@ func (a *app) setContentString(x, y int, style tcell.Style, content string) {
 func (a *app) getFieldScrolloffX() int {
 	_, _, width, _ := a.getFieldScreenSize()
 
-	if width >= a.settings.MaxScrolloff*2+1 {
-		return a.settings.MaxScrolloff
+	if width >= int(a.settings.MaxScrolloff)*2+1 {
+		return int(a.settings.MaxScrolloff)
 	}
 
 	if width%2 == 0 {
@@ -180,8 +180,8 @@ func (a *app) getFieldScrolloffX() int {
 func (a *app) getFieldScrolloffY() int {
 	_, _, _, height := a.getFieldScreenSize()
 
-	if height >= a.settings.MaxScrolloff*2+1 {
-		return a.settings.MaxScrolloff
+	if height >= int(a.settings.MaxScrolloff)*2+1 {
+		return int(a.settings.MaxScrolloff)
 	}
 
 	if height%2 == 0 {

@@ -44,7 +44,7 @@ type menu struct {
 	settingsState string
 	// DEFAULT, LIGHT, DARK, MONO
 	settingsThemeState   string
-	settingsMaxScrolloff int
+	settingsMaxScrolloff uint64
 }
 
 func (a *app) createMenu() {
@@ -371,7 +371,7 @@ func (a *app) drawMenuSettings() {
 	}
 	currStart += len(monoThemeStr) + 1
 
-	maxScrolloffStr := strconv.Itoa(a.menu.settingsMaxScrolloff)
+	maxScrolloffStr := strconv.Itoa(int(a.menu.settingsMaxScrolloff))
 	a.setContentString(0, 4, a.defStyle, maxScrolloffStr)
 }
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
 
 	bolt "go.etcd.io/bbolt"
@@ -9,7 +10,7 @@ import (
 type settings struct {
 	// DEFAULT,LIGHT,DARK,MONO
 	Theme        string
-	MaxScrolloff int
+	MaxScrolloff uint64
 }
 
 func getSettings() (settings, error) {
@@ -28,16 +29,22 @@ func getSettings() (settings, error) {
 	err = db.View(func(tx *bolt.Tx) error {
 		bucketSettings := tx.Bucket([]byte("Settings"))
 		if bucketSettings == nil {
-			return fmt.Errorf("bucket doesn't exist")
+			return fmt.Errorf("Error: Bucket doesn't exist")
 		}
 
-		gobSettings := bucketSettings.Get([]byte("ALL"))
-		if gobSettings == nil {
-			return fmt.Errorf("key doesn't exist")
+		themeValue := bucketSettings.Get([]byte("Theme"))
+		if themeValue == nil {
+			return fmt.Errorf("Error: Theme key does not exist.")
 		}
+		sett.Theme = string(themeValue)
 
-		sett, err = fromGob[settings](gobSettings)
-		return err
+		maxScrolloffValue := bucketSettings.Get([]byte("MaxScrolloff"))
+		if maxScrolloffValue == nil {
+			return fmt.Errorf("Error: MaxScrolloff key does not exist.")
+		}
+		sett.MaxScrolloff = binary.BigEndian.Uint64(maxScrolloffValue)
+
+		return nil
 	})
 	return sett, err
 }
@@ -63,12 +70,19 @@ func (a *app) updateSettings(sett settings) error {
 			return err
 		}
 
-		gobSettings, err := toGob(sett)
+		err = bucketSettings.Put([]byte("Theme"), []byte(sett.Theme))
 		if err != nil {
 			return err
 		}
 
-		return bucketSettings.Put([]byte("ALL"), gobSettings)
+		var buf [8]byte
+		binary.BigEndian.PutUint64(buf[:], sett.MaxScrolloff)
+		err = bucketSettings.Put([]byte("MaxScrolloff"), buf[:])
+		if err != nil {
+			return err
+		}
+
+		return nil
 	})
 	return err
 }
@@ -91,20 +105,26 @@ func initSettings() error {
 			return err
 		}
 
-		value := bucketSettings.Get([]byte("ALL"))
-		if value != nil {
-			return nil
+		themeValue := bucketSettings.Get([]byte("Theme"))
+		if themeValue == nil {
+			err = bucketSettings.Put([]byte("Theme"), []byte("DEFAULT"))
+			if err != nil {
+				return err
+			}
 		}
 
-		gobSettings, err := toGob(settings{
-			Theme:        "DEFAULT",
-			MaxScrolloff: 2,
-		})
-		if err != nil {
-			return err
+		maxScrolloffValue := bucketSettings.Get([]byte("MaxScrolloff"))
+		if maxScrolloffValue == nil {
+			var buf [8]byte
+			binary.BigEndian.PutUint64(buf[:], 2)
+			err = bucketSettings.Put([]byte("MaxScrolloff"), buf[:])
+			if err != nil {
+				return err
+			}
 		}
 
-		return bucketSettings.Put([]byte("ALL"), gobSettings)
+		return nil
 	})
+
 	return err
 }
