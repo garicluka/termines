@@ -502,9 +502,17 @@ func (a *app) cellToStyle(cell fieldCell) (rune, tcell.Style) {
 		return '-', a.defStyle
 	case CELL_STATE_FLAG:
 		if a.settings.Theme == "MONO" {
-			return 'F', a.defStyle
+			if a.settings.Icons == "ON" {
+				return '', a.defStyle
+			} else {
+				return 'F', a.defStyle
+			}
 		} else {
-			return 'F', a.defStyle.Background(tcell.ColorRed)
+			if a.settings.Icons == "ON" {
+				return '', a.defStyle.Background(tcell.ColorRed)
+			} else {
+				return 'F', a.defStyle.Background(tcell.ColorRed)
+			}
 		}
 	}
 
@@ -541,7 +549,12 @@ func (a *app) cellToStyle(cell fieldCell) (rune, tcell.Style) {
 		rune = '8'
 	case 9:
 		style = a.defStyle.Background(tcell.ColorRed)
-		rune = 'M'
+
+		if a.settings.Icons == "ON" {
+			rune = ''
+		} else {
+			rune = 'M'
+		}
 	}
 
 	if a.settings.Theme == "MONO" {

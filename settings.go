@@ -11,6 +11,8 @@ type settings struct {
 	// DEFAULT,LIGHT,DARK,MONO
 	Theme        string
 	MaxScrolloff uint64
+	// ON, OFF
+	Icons string
 }
 
 func getSettings() (settings, error) {
@@ -43,6 +45,12 @@ func getSettings() (settings, error) {
 			return fmt.Errorf("Error: MaxScrolloff key does not exist.")
 		}
 		sett.MaxScrolloff = binary.BigEndian.Uint64(maxScrolloffValue)
+
+		iconsValue := bucketSettings.Get([]byte("Icons"))
+		if iconsValue == nil {
+			return fmt.Errorf("Error: Icons key does not exist.")
+		}
+		sett.Icons = string(iconsValue)
 
 		return nil
 	})
@@ -78,6 +86,11 @@ func (a *app) updateSettings(sett settings) error {
 		var buf [8]byte
 		binary.BigEndian.PutUint64(buf[:], sett.MaxScrolloff)
 		err = bucketSettings.Put([]byte("MaxScrolloff"), buf[:])
+		if err != nil {
+			return err
+		}
+
+		err = bucketSettings.Put([]byte("Icons"), []byte(sett.Icons))
 		if err != nil {
 			return err
 		}
@@ -118,6 +131,14 @@ func initSettings() error {
 			var buf [8]byte
 			binary.BigEndian.PutUint64(buf[:], 2)
 			err = bucketSettings.Put([]byte("MaxScrolloff"), buf[:])
+			if err != nil {
+				return err
+			}
+		}
+
+		iconsValue := bucketSettings.Get([]byte("Icons"))
+		if iconsValue == nil {
+			err = bucketSettings.Put([]byte("Icons"), []byte("OFF"))
 			if err != nil {
 				return err
 			}

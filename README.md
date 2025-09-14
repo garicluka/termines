@@ -40,6 +40,9 @@ Note that Mono is like playing on a hard mode because you can't tell numbers apa
 Max scrolloff can be changed.
 When max scrolloff is higher than 0, because cursor behaves differently near the edges, you will always know if you are near the edge of the field without manually having to check.
 
+Icons can be toggled.
+Flag and Mines are icons when this is turned on. There is x icon for mines because other icons that are bomb or mine are too wide to fit on one cell.
+
 ## Keymaps
 
 ### Menu

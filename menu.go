@@ -40,11 +40,13 @@ type menu struct {
 	savedGamesFindLastMPress              time.Time
 	savedGamesFindLastMPressIndex         int
 
-	// THEME, MAX_SCROLLOFF
+	// THEME, MAX_SCROLLOFF, ICONS
 	settingsState string
 	// DEFAULT, LIGHT, DARK, MONO
 	settingsThemeState   string
 	settingsMaxScrolloff uint64
+	// ON, OFF
+	settingsIconsState string
 }
 
 func (a *app) createMenu() {
@@ -75,6 +77,7 @@ func (a *app) createMenu() {
 		settingsState:        "THEME",
 		settingsThemeState:   a.settings.Theme,
 		settingsMaxScrolloff: a.settings.MaxScrolloff,
+		settingsIconsState:   a.settings.Icons,
 	}
 }
 
@@ -334,11 +337,14 @@ func (a *app) drawMenuSettings() {
 
 	a.setContentString(0, 1, a.defStyle, "Theme")
 	a.setContentString(0, 3, a.defStyle, "MAX_SCROLLOFF")
+	a.setContentString(0, 5, a.defStyle, "ICONS")
 	switch a.menu.settingsState {
 	case "THEME":
 		a.setContentString(0, 1, a.defStyle.Reverse(true), "Theme")
 	case "MAX_SCROLLOFF":
 		a.setContentString(0, 3, a.defStyle.Reverse(true), "MAX_SCROLLOFF")
+	case "ICONS":
+		a.setContentString(0, 5, a.defStyle.Reverse(true), "ICONS")
 	}
 
 	currStart := 0
@@ -373,6 +379,33 @@ func (a *app) drawMenuSettings() {
 
 	maxScrolloffStr := strconv.Itoa(int(a.menu.settingsMaxScrolloff))
 	a.setContentString(0, 4, a.defStyle, maxScrolloffStr)
+
+	currStart = 0
+
+	// this is because of weird icon width thing
+	onIconsStr := "On(XX)"
+	a.screen.SetContent(currStart+0, 6, 'O', nil, a.defStyle)
+	a.screen.SetContent(currStart+1, 6, 'n', nil, a.defStyle)
+	a.screen.SetContent(currStart+2, 6, '(', nil, a.defStyle)
+	a.screen.SetContent(currStart+3, 6, '', nil, a.defStyle)
+	a.screen.SetContent(currStart+4, 6, '', nil, a.defStyle)
+	a.screen.SetContent(currStart+5, 6, ')', nil, a.defStyle)
+	if a.menu.settingsIconsState == "ON" {
+		a.screen.SetContent(currStart+0, 6, 'O', nil, a.defStyle.Reverse(true))
+		a.screen.SetContent(currStart+1, 6, 'n', nil, a.defStyle.Reverse(true))
+		a.screen.SetContent(currStart+2, 6, '(', nil, a.defStyle.Reverse(true))
+		a.screen.SetContent(currStart+3, 6, '', nil, a.defStyle.Reverse(true))
+		a.screen.SetContent(currStart+4, 6, '', nil, a.defStyle.Reverse(true))
+		a.screen.SetContent(currStart+5, 6, ')', nil, a.defStyle.Reverse(true))
+	}
+	currStart += len(onIconsStr) + 1
+
+	offIconsStr := "Off"
+	a.setContentString(currStart, 6, a.defStyle, offIconsStr)
+	if a.menu.settingsIconsState == "OFF" {
+		a.setContentString(currStart, 6, a.defStyle.Reverse(true), offIconsStr)
+	}
+	currStart += len(offIconsStr) + 1
 }
 
 func (a *app) eventKeyMenuSelect(key tcell.Key, rune rune) {
@@ -828,6 +861,7 @@ func (a *app) eventKeyMenuSettings(key tcell.Key, rune rune) {
 		newSettings := settings{
 			Theme:        a.menu.settingsThemeState,
 			MaxScrolloff: a.menu.settingsMaxScrolloff,
+			Icons:        a.menu.settingsIconsState,
 		}
 
 		err := a.updateSettings(newSettings)
@@ -866,6 +900,8 @@ func (a *app) eventKeyMenuSettings(key tcell.Key, rune rune) {
 		case "THEME":
 			a.menu.settingsState = "MAX_SCROLLOFF"
 		case "MAX_SCROLLOFF":
+			a.menu.settingsState = "ICONS"
+		case "ICONS":
 			a.menu.settingsState = "THEME"
 		}
 	}
@@ -873,9 +909,11 @@ func (a *app) eventKeyMenuSettings(key tcell.Key, rune rune) {
 	if rune == 'k' || key == tcell.KeyUp {
 		switch a.menu.settingsState {
 		case "THEME":
-			a.menu.settingsState = "MAX_SCROLLOFF"
+			a.menu.settingsState = "ICONS"
 		case "MAX_SCROLLOFF":
 			a.menu.settingsState = "THEME"
+		case "ICONS":
+			a.menu.settingsState = "MAX_SCROLLOFF"
 		}
 	}
 
@@ -896,6 +934,13 @@ func (a *app) eventKeyMenuSettings(key tcell.Key, rune rune) {
 			if a.menu.settingsMaxScrolloff > 0 {
 				a.menu.settingsMaxScrolloff--
 			}
+		case "ICONS":
+			switch a.menu.settingsIconsState {
+			case "ON":
+				a.menu.settingsIconsState = "OFF"
+			case "OFF":
+				a.menu.settingsIconsState = "ON"
+			}
 		}
 	}
 
@@ -914,6 +959,13 @@ func (a *app) eventKeyMenuSettings(key tcell.Key, rune rune) {
 			}
 		case "MAX_SCROLLOFF":
 			a.menu.settingsMaxScrolloff++
+		case "ICONS":
+			switch a.menu.settingsIconsState {
+			case "ON":
+				a.menu.settingsIconsState = "OFF"
+			case "OFF":
+				a.menu.settingsIconsState = "ON"
+			}
 		}
 	}
 }
