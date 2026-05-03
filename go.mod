@@ -1,4 +1,4 @@
-module github.com/garicluka/termines
+module github.com/garicluka/termines/v2
 
 go 1.25.1
 
