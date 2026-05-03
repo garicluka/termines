@@ -6,7 +6,15 @@ Minesweeper tui app
 
 ## How to run
 
-Binaries are linked in github releases, or download the code and use:
+You can download binaries linked in github releases.
+
+Or run:
+
+```bash
+go install github.com/garicluka/termines@latest
+```
+
+Or you can download the code and use:
 
 ```bash
 go run .
