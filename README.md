@@ -11,7 +11,7 @@ You can download binaries linked in github releases.
 Or run:
 
 ```bash
-go install github.com/garicluka/termines@latest
+go install github.com/garicluka/termines/v2@latest
 ```
 
 Or you can download the code and use:
